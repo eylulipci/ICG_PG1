@@ -3,12 +3,9 @@ precision highp float;
 varying float v2f_height;
 
 /* #TODO PG1.6.1: Copy Blinn-Phong shader setup from previous exercises */
-varying vec3 frag_pos;
 varying vec3 v2f_normal;
-
-varying vec3 direction_to_camera;
 varying vec3 direction_to_light;
-varying float distance_to_light;
+varying vec3 direction_to_camera;
 
 
 const vec3  light_color = vec3(1.0, 0.941, 0.898);
@@ -51,19 +48,16 @@ void main()
 	*/
 	vec3 color = vec3(0., 0., 0.);
 
-
-	//vec3 light_color_scaled = light_color / (distance_to_light * distance_to_light);
-
 	vec3 norm_normal = normalize(v2f_normal);
 	vec3 norm_direction_to_light = normalize(direction_to_light);
 	vec3 norm_direction_to_camera = normalize(direction_to_camera);
 
-	vec3 diffuse = material_color * dot(norm_normal, norm_direction_to_light);
+	vec3 diffuse = light_color * material_color * dot(norm_direction_to_light, norm_normal);
 
 	vec3 specular_blinn;
 	vec3 half_vector = normalize(norm_direction_to_light + norm_direction_to_camera);
 	
-	specular_blinn = material_color * pow(dot(norm_normal, half_vector), shininess);
+	specular_blinn = light_color *  material_color * pow(dot(norm_normal, half_vector), shininess);
 	vec3 blinn_light = diffuse + specular_blinn;
 
 	if(dot(norm_normal, norm_direction_to_light) < 0.)
@@ -72,8 +66,7 @@ void main()
 		color = diffuse;
 	else
 		color = blinn_light;
-		
-	//color = material_color * light_color;
+	
 	color += ambient;
 	gl_FragColor = vec4(color, 1.); // output: RGBA in 0..1 range
 }

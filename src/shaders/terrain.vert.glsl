@@ -4,12 +4,9 @@ attribute vec3 normal;
 varying float v2f_height;
 
 /* #TODO PG1.6.1: Copy Blinn-Phong shader setup from previous exercises */
-varying vec3 frag_pos;
 varying vec3 v2f_normal;
-
-varying vec3 direction_to_camera;
 varying vec3 direction_to_light;
-varying float distance_to_light;
+varying vec3 direction_to_camera;
 
 uniform mat4 mat_mvp;
 uniform mat4 mat_model_view;
@@ -31,13 +28,15 @@ void main()
     */
 	// Setup Blinn-Phong varying variables
 	//v2f_normal = normal; // TODO apply normal transformation
-    frag_pos = vec3(mat_model_view * vec4(position, 1));
+	vec4 vertex_position_eye = mat_model_view * vec4(position, 1.);
+
 	v2f_normal = normalize(mat_normals * normal);
 
+	vec4 light_position_eye = light_position;
 
-	vec3 direction_to_camera = -normalize(frag_pos);
-	vec3 direction_to_light = normalize(vec3(light_position) - frag_pos);
-	float distance_to_light = length(frag_pos - vec3(light_position));
+	direction_to_camera = normalize(-vertex_position_eye.xyz);
+
+	direction_to_light = normalize(light_position_eye.xyz - vertex_position_eye.xyz);
 	
 	gl_Position = mat_mvp * position_v4;
 }
