@@ -4,9 +4,12 @@ attribute vec3 normal;
 varying float v2f_height;
 
 /* #TODO PG1.6.1: Copy Blinn-Phong shader setup from previous exercises */
-//varying ...
-//varying ...
-//varying ...
+varying vec3 frag_pos;
+varying vec3 v2f_normal;
+
+varying vec3 direction_to_camera;
+varying vec3 direction_to_light;
+varying float distance_to_light;
 
 uniform mat4 mat_mvp;
 uniform mat4 mat_model_view;
@@ -19,7 +22,7 @@ void main()
     vec4 position_v4 = vec4(position, 1);
 
     /** #TODO PG1.6.1:
-	Setup all outgoing variables so that you can compute in the fragmend shader
+	Setup all outgoing variables so that you can compute in the fragment shader
     the phong lighting. You will need to setup all the uniforms listed above, before you
     can start coding this shader.
 
@@ -28,6 +31,13 @@ void main()
     */
 	// Setup Blinn-Phong varying variables
 	//v2f_normal = normal; // TODO apply normal transformation
+    frag_pos = vec3(mat_model_view * vec4(position, 1));
+	v2f_normal = normalize(mat_normals * normal);
+
+
+	vec3 direction_to_camera = -normalize(frag_pos);
+	vec3 direction_to_light = normalize(vec3(light_position) - frag_pos);
+	float distance_to_light = length(frag_pos - vec3(light_position));
 	
 	gl_Position = mat_mvp * position_v4;
 }

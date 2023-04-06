@@ -64,7 +64,13 @@ function terrain_build_mesh(height_map) {
 
 			The XY coordinates are calculated so that the full grid covers the square [-0.5, 0.5]^2 in the XY plane.
 			*/
-			vertices[idx] = [0, 0, 0]
+			//let x = idx
+			if(elevation < WATER_LEVEL){
+				vertices[idx] = [gx/grid_width - 0.5, gy/grid_height - 0.5, WATER_LEVEL]
+				normals[idx] = [0., 0., 1.]
+			}else{
+				vertices[idx] = [gx/grid_width - 0.5, gy/grid_height -0.5, elevation]
+			}
 		}
 	}
 
@@ -76,6 +82,14 @@ function terrain_build_mesh(height_map) {
 			*/
 
 			// faces.push([v1, v2, v3]) // adds a triangle on vertex indices v1, v2, v3
+			let v1 = xy_to_v_index(gx, gy)
+			let v2 = xy_to_v_index(gx +1, gy)
+			let v3 = xy_to_v_index(gx, gy + 1)
+			faces.push([v1, v2, v3])
+
+			let v4 = xy_to_v_index(gx + 1, gy+1)
+
+			faces.push([v2, v4, v3])
 		}
 	}
 

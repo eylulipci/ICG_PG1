@@ -3,9 +3,12 @@ precision highp float;
 varying float v2f_height;
 
 /* #TODO PG1.6.1: Copy Blinn-Phong shader setup from previous exercises */
-//varying ...
-//varying ...
-//varying ...
+varying vec3 frag_pos;
+varying vec3 v2f_normal;
+
+varying vec3 direction_to_camera;
+varying vec3 direction_to_light;
+varying float distance_to_light;
 
 
 const vec3  light_color = vec3(1.0, 0.941, 0.898);
@@ -31,14 +34,46 @@ void main()
 			color = interpolate between terrain_color_grass and terrain_color_mountain, weight is (height - terrain_water_level)*2
 	 		shininess = 2.
 	*/
-	vec3 material_color = terrain_color_grass;
-	float shininess = 0.5;
+	vec3 material_color;
+	float shininess;
+	if(height > terrain_water_level){
+		material_color = mix(terrain_color_grass, terrain_color_mountain, (height - terrain_water_level)*2.);
+		shininess = 2.;
+	}else{
+		material_color = terrain_color_water;
+		shininess = 30.;
+	}
 
 	/* #TODO PG1.6.1: apply the Blinn-Phong lighting model
     	Implement the Phong shading model by using the passed variables and write the resulting color to `color`.
     	`material_color` should be used as material parameter for ambient, diffuse and specular lighting.
     	Hints:
 	*/
-	vec3 color = material_color * light_color;
+	vec3 color = vec3(0., 0., 0.);
+
+
+	//vec3 light_color_scaled = light_color / (distance_to_light * distance_to_light);
+
+	vec3 norm_normal = normalize(v2f_normal);
+	vec3 norm_direction_to_light = normalize(direction_to_light);
+	vec3 norm_direction_to_camera = normalize(direction_to_camera);
+
+	vec3 diffuse = material_color * dot(norm_normal, norm_direction_to_light);
+
+	vec3 specular_blinn;
+	vec3 half_vector = normalize(norm_direction_to_light + norm_direction_to_camera);
+	
+	specular_blinn = material_color * pow(dot(norm_normal, half_vector), shininess);
+	vec3 blinn_light = diffuse + specular_blinn;
+
+	if(dot(norm_normal, norm_direction_to_light) < 0.)
+		color = vec3(0., 0., 0.);
+	else if(dot(norm_normal, half_vector) < 0.)
+		color = diffuse;
+	else
+		color = blinn_light;
+		
+	//color = material_color * light_color;
+	color += ambient;
 	gl_FragColor = vec4(color, 1.); // output: RGBA in 0..1 range
 }
